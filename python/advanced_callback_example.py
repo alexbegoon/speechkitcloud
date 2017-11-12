@@ -7,20 +7,22 @@ use it like
 
 session_id = "not-set"
 
-def advanced_callback(asr_response, correction = 0):
+def advanced_callback(asr_response, correction = 0, start_time = 0):
     print("Got response:")
     print("end-of-utterance = {}".format(asr_response.endOfUtt))
     r_count = 0
+    last_words = []
     for r in asr_response.recognition:
         print("recognition[{}] = {}; confidence = {}".format(r_count, r.normalized.encode("utf-8"), r.confidence))
         print("utterance timings: from {} to {}".format(r.align_info.start_time+correction,r.align_info.end_time+correction))
         w_count = 0
+        last_words = r.words
         for w in r.words:
             print("word[{}] = {}; confidence = {}".format(w_count, w.value.encode("utf-8"), w.confidence))
             print("word timings: from {} to {}".format(w.align_info.start_time+correction,w.align_info.end_time+correction))
             w_count += 1
         r_count += 1
-
+    requests.post("http://happybox.omadonex.com/api/data/speech", data={'recognition': recognition[r_count], 'words': last_words, 'start_time': start_time})
 
 def advanced_utterance_callback(asr_response, data_chunks):
     data_length = 0
